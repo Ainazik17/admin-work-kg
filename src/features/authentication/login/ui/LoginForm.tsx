@@ -43,29 +43,29 @@ export const LoginForm: FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 		<StyledFormWrap>
 			<StyledForm
 				id='login-form'
-				// handleSubmit вызовет onSubmit, который пришел из LoginPage
 				onSubmit={handleSubmit(onSubmit)}
 			>
 				<Box
 					display='flex'
-					gap={'14px'}
+					gap={'12px'}
 					flexDirection='column'
-					marginBottom='28px'
+					marginBottom='8px'
 				>
 					<Typography
 						id='login-title'
-						textAlign='center'
-						fontWeight={600}
-						fontSize='24px'
+						textAlign='left'
+						fontWeight={700}
+						fontSize={{ xs: '28px', sm: '32px' }}
 						color='#111827'
 					>
 						{t('youkoso')}
 					</Typography>
 					<Typography
 						id='login-description'
-						fontSize='14px'
-						textAlign='center'
+						fontSize='15px'
+						textAlign='left'
 						color='#6B7280'
+						fontWeight={400}
 					>
 						{t('loginToContinue')}
 					</Typography>
@@ -78,7 +78,6 @@ export const LoginForm: FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 					label={t('common:email')}
 					placeholder='admin@work.kg'
 					error={errors.email as FieldError}
-					// helperText={errors.email?.message}
 					{...register('email', {
 						required: t('common:requiredField'),
 						pattern: {
@@ -86,6 +85,30 @@ export const LoginForm: FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 							message: t('common:invalidEmail'),
 						},
 					})}
+					sx={{
+						'& .MuiOutlinedInput-root': {
+							borderRadius: '10px',
+							fontSize: '15px',
+							height: '48px',
+							backgroundColor: '#F9FAFB',
+							border: '1.5px solid #E5E7EB',
+							transition: 'all 0.3s ease',
+
+							'&:hover': {
+								borderColor: '#D1D5DB',
+								backgroundColor: '#F3F4F6',
+							},
+
+							'&.Mui-focused': {
+								borderColor: '#667eea',
+								backgroundColor: '#ffffff',
+								boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)',
+							},
+						},
+						'& .MuiInputBase-input::placeholder': {
+							opacity: 0.5,
+						},
+					}}
 				/>
 
 				<Input
@@ -94,7 +117,6 @@ export const LoginForm: FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 					label={t('password')}
 					placeholder={t('password')}
 					error={errors.password as FieldError}
-					// helperText={errors.password?.message}
 					{...register('password', {
 						required: t('common:requiredField'),
 						minLength: { value: 4, message: t('common:tooShort') },
@@ -104,18 +126,58 @@ export const LoginForm: FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 							aria-label='toggle password visibility'
 							onClick={handleClickShowPassword}
 							edge='end'
+							sx={{
+								color: '#9CA3AF',
+								'&:hover': {
+									color: '#667eea',
+									backgroundColor: 'transparent',
+								},
+							}}
 						>
 							{showPassword ? <VisibilityOff /> : <Visibility />}
 						</IconButton>
 					}
+					sx={{
+						'& .MuiOutlinedInput-root': {
+							borderRadius: '10px',
+							fontSize: '15px',
+							height: '48px',
+							backgroundColor: '#F9FAFB',
+							border: '1.5px solid #E5E7EB',
+							transition: 'all 0.3s ease',
+
+							'&:hover': {
+								borderColor: '#D1D5DB',
+								backgroundColor: '#F3F4F6',
+							},
+
+							'&.Mui-focused': {
+								borderColor: '#667eea',
+								backgroundColor: '#ffffff',
+								boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.1)',
+							},
+						},
+						'& .MuiInputBase-input::placeholder': {
+							opacity: 0.5,
+						},
+					}}
 				/>
 
-				<Box display='flex' justifyContent='flex-end'>
+				<Box display='flex' justifyContent='flex-end' marginTop='4px'>
 					<Link
-						sx={{ width: 'fit-content', fontSize: '14px' }}
+						sx={{
+							width: 'fit-content',
+							fontSize: '14px',
+							fontWeight: 500,
+							textDecoration: 'none',
+							color: '#667eea',
+							'&:hover': {
+								color: '#764ba2',
+								textDecoration: 'underline',
+							},
+						}}
 						id='forgot-password-link'
 						to={keyPaths.forgotPassword()}
-						color='#2563EB'
 					>
 						{t('forgot-password')}
 					</Link>
@@ -123,12 +185,10 @@ export const LoginForm: FC<LoginFormProps> = ({ onSubmit, isLoading }) => {
 
 				<SubmitButton
 					id='submit-btn'
-					// Используем isLoading из пропсов (состояние мутации в LoginPage)
 					isLoading={isLoading}
 					disabled={!isValid || isLoading}
 					type='submit'
 					variant='contained'
-					sx={{ mt: 1 }}
 				>
 					{t('common:continue')}
 				</SubmitButton>
