@@ -1,4 +1,4 @@
-// Раздел «Сериал»: 1-я серия бесплатна, остальные — с любым тарифом.
+// Раздел «Сериал»: админ сам отмечает, какие серии бесплатные; остальные — с любым тарифом.
 // Первый активный сериал показывается баннером на главной Mini App.
 import React, { useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -59,7 +59,7 @@ export const SeriesList: React.FC = () => {
 						Сериал
 					</Typography>
 					<Typography variant='body2' color='text.secondary'>
-						1-я серия бесплатно, остальные — с любым тарифом. Первый активный сериал — баннер на главной Mini App
+						Бесплатные серии отмечаете вы, остальные открываются с любым тарифом. Первый активный сериал — баннер на главной Mini App
 					</Typography>
 				</Box>
 				<Button variant='contained' startIcon={<Add />} sx={{ bgcolor: '#0f172a', borderRadius: 2 }} onClick={() => setOpen(true)}>
@@ -162,7 +162,9 @@ const EpisodeDialog: React.FC<{
 	onClose: () => void
 	seriesId: number
 	episode?: SeriesEpisode | null
-}> = ({ open, onClose, seriesId, episode }) => {
+	/** У сериала ещё нет серий — новую по умолчанию делаем бесплатной */
+	firstEpisode?: boolean
+}> = ({ open, onClose, seriesId, episode, firstEpisode }) => {
 	const [form, setForm] = useState(emptyEpisode)
 	const [add, { isLoading: adding }] = useAddEpisodeMutation()
 	const [update, { isLoading: updating }] = useUpdateEpisodeMutation()
@@ -177,10 +179,10 @@ const EpisodeDialog: React.FC<{
 						videoUrl: episode.videoUrl || '',
 						description: episode.description || '',
 						durationMin: episode.durationSec ? String(+(episode.durationSec / 60).toFixed(1)) : '',
-						isFree: episode.free && episode.number !== 1,
+						isFree: episode.free,
 						isPublished: episode.isPublished !== false,
 					}
-				: emptyEpisode,
+				: { ...emptyEpisode, isFree: !!firstEpisode },
 		)
 
 	const urlError = form.videoUrl.trim() && !YT.test(form.videoUrl) ? 'Нужна ссылка на видео YouTube' : ''
@@ -229,7 +231,7 @@ const EpisodeDialog: React.FC<{
 					error={!!urlError} helperText={urlError || ' '} onChange={(e) => set('videoUrl', e.target.value)} />
 				<TextField label='Описание' multiline minRows={2} size='small' value={form.description} inputProps={{ maxLength: 5000 }}
 					onChange={(e) => set('description', e.target.value)} />
-				<FormControlLabel label='Бесплатная (1-я серия бесплатна всегда)'
+				<FormControlLabel label='Бесплатная — смотреть без тарифа'
 					control={<Switch checked={form.isFree} onChange={(e) => set('isFree', e.target.checked)} />} />
 				<FormControlLabel label='Опубликована'
 					control={<Switch checked={form.isPublished} onChange={(e) => set('isPublished', e.target.checked)} />} />
@@ -252,6 +254,7 @@ export const SeriesDetails: React.FC = () => {
 	const { data: s, isLoading, isError } = useGetSeriesQuery(seriesId)
 	const [deleteSeries] = useDeleteSeriesMutation()
 	const [deleteEpisode] = useDeleteEpisodeMutation()
+	const [updateEpisode] = useUpdateEpisodeMutation()
 	const [uploadCover, { isLoading: coverLoading }] = useUploadSeriesCoverMutation()
 	const [uploadThumb] = useUploadEpisodeThumbnailMutation()
 	const [editSeries, setEditSeries] = useState(false)
@@ -289,6 +292,25 @@ export const SeriesDetails: React.FC = () => {
 			navigate(keyPaths.series())
 		} catch (e) {
 			toastUtils.error(getErrorMessage(e))
+		}
+	}
+	// Переключатель «Бесплатно» прямо в списке: остальные поля серии не меняем
+	const toggleFree = async (e: SeriesEpisode, free: boolean) => {
+		try {
+			await updateEpisode({
+				id: e.id,
+				body: {
+					number: e.number,
+					title: e.title,
+					description: e.description || '',
+					durationSec: e.durationSec ?? null,
+					isFree: free,
+					isPublished: e.isPublished !== false,
+				},
+			}).unwrap()
+			toastUtils.success(free ? `Серия ${e.number} — бесплатная` : `Серия ${e.number} — с тарифом`)
+		} catch (err) {
+			toastUtils.error(getErrorMessage(err))
 		}
 	}
 	const removeEpisode = async (e: SeriesEpisode) => {
@@ -353,6 +375,8 @@ export const SeriesDetails: React.FC = () => {
 							<Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
 								<Typography sx={{ fontWeight: 700 }}>{e.number}. {e.title}</Typography>
 								{e.free ? <Chip label='Бесплатно' color='success' size='small' /> : <Chip label='С тарифом' color='error' size='small' variant='outlined' />}
+								<FormControlLabel sx={{ ml: 0.5 }} label={<Typography variant='body2'>бесплатная</Typography>}
+									control={<Switch size='small' checked={e.free} onChange={(ev) => toggleFree(e, ev.target.checked)} />} />
 								{e.isPublished === false && <Chip label='Черновик' size='small' />}
 							</Box>
 							<Typography variant='body2' color='text.secondary'>
@@ -378,6 +402,7 @@ export const SeriesDetails: React.FC = () => {
 
 			<SeriesDialog open={editSeries} onClose={() => setEditSeries(false)} series={s} />
 			<EpisodeDialog open={epDialog.open} episode={epDialog.episode} seriesId={s.id}
+				firstEpisode={!s.episodes?.length}
 				onClose={() => setEpDialog({ open: false })} />
 		</Box>
 	)

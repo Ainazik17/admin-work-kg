@@ -26,6 +26,7 @@ import { Social } from '#pages/SocialTask/Social'
 import { FeedbackPage } from '#pages/Feedback/Feedback'
 import { Categories } from '#pages/Categories/Categories'
 import { SeriesDetails, SeriesList } from '#pages/Series/SeriesPage'
+import { BroadcastPage } from '#pages/Broadcast/BroadcastPage'
 
 const ErrorFallback = lazyWithRetry(
 	() => import('#shared/ui/error-fallback/ErrorFallback'),
@@ -138,6 +139,10 @@ export const buildAppRoutes = () =>
 						{
 							path: keyPaths.socialNetworks(),
 							element: <Social />,
+						},
+						{
+							path: keyPaths.broadcast(),
+							element: <BroadcastPage />,
 						},
 						{
 							path: keyPaths.series(),
