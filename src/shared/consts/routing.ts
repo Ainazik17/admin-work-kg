@@ -37,6 +37,10 @@ export const keyPaths = {
 	// ========= Social Networks =========
 	socialNetworks: () => '/social-networks',
 
+	// ========= Series =========
+	series: () => '/series',
+	seriesDetails: (id: string = ':id') => `/series/${id}`,
+
 	// ========= Payments / Payouts =========
 	payouts: () => '/payouts',
 

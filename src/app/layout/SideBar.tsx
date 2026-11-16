@@ -27,6 +27,7 @@ import {
 	SettingsOutlined,
 	LogoutOutlined,
 	Category,
+	MovieOutlined,
 } from '@mui/icons-material'
 import { keyPaths } from '#shared/consts/routing.ts'
 
@@ -65,6 +66,7 @@ const getMenuItems = () => [
 		path: keyPaths.socialNetworks(),
 		icon: <ShareOutlined />,
 	},
+	{ text: 'Сериал', path: keyPaths.series(), icon: <MovieOutlined /> },
 	{ text: 'Выплаты', path: keyPaths.payouts(), icon: <PaymentOutlined /> },
 	{ text: 'Категории', path: keyPaths.categories(), icon: <Category /> },
 ]
